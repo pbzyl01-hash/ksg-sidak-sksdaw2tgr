@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIDAK KSDAE - Web Konservasi Spesies dan Genetik</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Google Inter & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    @keyframes text-glow-pulse {
+      0%, 100% {
+        text-shadow: 0 0 12px rgba(34, 197, 94, 0.4), 0 0 25px rgba(34, 197, 94, 0.2);
+        transform: scale(1);
+      }
+      50% {
+        text-shadow: 0 0 28px rgba(34, 197, 94, 0.95), 0 0 50px rgba(22, 163, 74, 0.6);
+        transform: scale(1.02);
+      }
+    }
+    .neon-pulse-header {
+      animation: text-glow-pulse 3.5s infinite ease-in-out;
+    }
+    /* Smooth custom scrollbar for horizontal table */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col font-sans">
+
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-brand-600 p-2.5 rounded-2xl shadow-lg shadow-brand-500/30 flex items-center justify-center text-white">
+          <i class="fa-solid fa-seedling text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-500 neon-pulse-header select-none">
+            Data Konservasi Spesies dan Genetik
+          </h1>
+          <p class="text-xs font-bold tracking-widest text-gray-500 dark:text-gray-400">SIDAK KSDAE</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all flex items-center justify-center text-lg shadow-sm" title="Ubah Mode Visual">
+          <i id="themeIcon" class="fa-solid fa-moon text-gray-600 dark:text-yellow-400"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Sidebar Panel: Modules List & Filters -->
+      <div class="lg:col-span-4 space-y-6">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-200/60 dark:border-gray-800 shadow-sm">
+          <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 flex items-center space-x-2">
+            <i class="fa-solid fa-layer-group text-brand-600"></i>
+            <span>Daftar Modul Pelaporan</span>
+          </h3>
+          
+          <!-- Periodicity Filters -->
+          <div class="mb-4">
+            <label class="block text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Penyaring Periode</label>
+            <div class="grid grid-cols-4 gap-1 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl text-[10px] font-bold">
+              <button type="button" onclick="filterPeriod('Bulanan')" id="btn-p-Bulanan" class="period-tab py-2 rounded-lg transition-all text-center">Bulan</button>
+              <button type="button" onclick="filterPeriod('Triwulan')" id="btn-p-Triwulan" class="period-tab py-2 rounded-lg transition-all text-center">Triwulan</button>
+              <button type="button" onclick="filterPeriod('Semester')" id="btn-p-Semester" class="period-tab py-2 rounded-lg transition-all text-center">Smstr</button>
+              <button type="button" onclick="filterPeriod('Tahunan')" id="btn-p-Tahunan" class="period-tab py-2 rounded-lg transition-all text-center">Tahun</button>
+            </div>
+          </div>
+          
+          <!-- Module List Container -->
+          <div id="moduleList" class="space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+        
+        <div class="bg-emerald-50 dark:bg-emerald-950/40 rounded-3xl p-6 border border-emerald-200/50 dark:border-emerald-900/30">
+          <h4 class="text-sm font-bold text-emerald-800 dark:text-emerald-400 mb-2 flex items-center space-x-1.5">
+            <i class="fa-brands fa-google-drive"></i>
+            <span>Arsip Google Drive</span>
+          </h4>
+          <p class="text-xs text-emerald-700/90 dark:text-emerald-300/80 leading-relaxed">
+            Folder periode pada Google Drive disusun otomatis berdasarkan kelompok waktu pelaporan (Misal: Januari, Triwulan I, Semester I, Tahunan).
+          </p>
+          <a href="https://drive.google.com/drive/folders/12J0W6rTxhNdVJ2eD_eUSaacCBcue495u?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline mt-3">
+            <span>Akses Link Drive SIDAK</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Input Form and Database Table Viewer -->
+      <div class="lg:col-span-8 space-y-8">
+        
+        <!-- Main Input Form Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 border border-gray-200/60 dark:border-gray-800 shadow-sm relative overflow-hidden">
+          
+          <!-- Banner Tag -->
+          <div class="absolute top-0 right-0 bg-brand-600 text-white text-[10px] tracking-widest uppercase font-extrabold px-5 py-1.5 rounded-bl-2xl shadow-sm animate-pulse" id="moduleTag">
+            C.01 - BULANAN
+          </div>
+          
+          <div class="mb-6">
+            <h2 id="formTitle" class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mr-20 leading-snug">
+              Perjumpaan Spesies di dalam dan luar Kawasan Konservasi
+            </h2>
+            <p id="formSub" class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 font-medium">Modul C.01 • Periode Bulanan</p>
+          </div>
+          
+          <!-- State Alert Banner -->
+          <div id="alertBox" class="hidden mb-6 p-4 rounded-2xl flex items-start space-x-3 transition-all"></div>
+
+          <!-- Dynamic Input Form -->
+          <form id="conservationForm" onsubmit="handleFormSubmission(event)" class="space-y-6">
+            
+            <!-- Technical state management inputs -->
+            <input type="hidden" id="activeModule" value="C.01">
+            <input type="hidden" id="activePeriodType" value="Bulanan">
+            <input type="hidden" id="editRowId" name="row_id" value="">
+
+            <!-- Base Metadata Fields -->
+            <div class="bg-gray-50/70 dark:bg-gray-900/40 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-4">
+              <div class="flex items-center justify-between mb-1">
+                <h4 class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-wider uppercase">INFORMASI SATUAN KERJA & PERIODE</h4>
+                <div id="editModeBadge" class="hidden px-2 py-0.5 bg-amber-500 text-white text-[10px] font-extrabold rounded-md animate-pulse">MODE EDITING DATA</div>
+              </div>
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                    <span>Satuan Kerja / Unit Pelaksana Teknis <span class="text-red-500">*</span></span>
+                    <span class="text-[10px] text-brand-600 dark:text-brand-400 font-bold"><i class="fa-solid fa-lock mr-1"></i>Dikunci oleh Sistem</span>
+                  </label>
+                  <input type="text" name="unit_kerja" id="field_unit_kerja" readonly value="Balai KSDA Kalimantan Timur" class="w-full h-11 px-4 text-sm rounded-xl bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 font-bold text-gray-500 dark:text-gray-400 cursor-not-allowed select-none focus:outline-none transition">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div>
+                  <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tahun Pelaporan <span class="text-red-500">*</span></label>
+                  <select name="tahun" id="field_tahun" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                    <option value="2026" selected>2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2027">2027</option>
+                  </select>
+                </div>
+                
+                <!-- Period Input Context Block -->
+                <div id="dynamicPeriodContainer">
+                  <!-- Swapped dynamic period criteria in Javascript -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Schema-Driven Fields Section -->
+            <div id="dynamicFields" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <!-- Dynamically rendered per module standard templates -->
+            </div>
+
+            <!-- Action Controllers -->
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <button type="button" id="cancelEditBtn" onclick="exitEditMode()" class="hidden px-5 py-3 text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300 rounded-xl hover:bg-rose-100 transition">
+                Batal Edit
+              </button>
+              <button type="reset" id="resetBtn" class="px-5 py-3 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 rounded-xl transition">
+                Reset Form
+              </button>
+              <button type="submit" id="submitBtn" class="px-6 py-3 text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center space-x-2">
+                <i class="fa-regular fa-paper-plane" id="submitBtnIcon"></i>
+                <span id="submitBtnText">Kirim Laporan</span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Database Section designed exactly like image_40b0db.png -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-200/60 dark:border-gray-800 shadow-sm overflow-hidden space-y-5">
+          
+          <!-- Database Header Row -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+              <!-- Left light green database icon container -->
+              <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/50 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <i class="fa-solid fa-database text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white" id="rekapTitle">
+                  Database: Perjumpaan Spesies
+                </h3>
+                <p class="text-xs text-gray-400 dark:text-gray-500">
+                  Daftar entri data aktif yang tersimpan di server Google Sheets
+                </p>
+              </div>
+            </div>
+            
+            <!-- Right search and reload actions -->
+            <div class="flex items-center space-x-2 w-full md:w-auto">
+              <div class="relative flex-grow md:flex-grow-0 md:w-64">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" id="dbSearch" oninput="applyClientSideSearch()" placeholder="Cari data..." class="w-full h-10 pl-9 pr-4 text-xs rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+              </div>
+              <button onclick="loadHistoryData()" class="w-10 h-10 bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-800 rounded-xl flex items-center justify-center transition" title="Segarkan Data">
+                <i class="fa-solid fa-arrows-rotate text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Horizontal Table Wrapper -->
+          <div class="overflow-x-auto w-full border border-gray-100 dark:border-gray-800/80 rounded-2xl">
+            <table class="w-full text-left text-xs border-collapse whitespace-nowrap">
+              <thead>
+                <tr class="bg-gray-50/75 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800 text-[10px] font-extrabold uppercase tracking-wider" id="historyTableHeaderRow">
+                  <!-- Dynamically populated based on active schema -->
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Dynamically populated rows with edit and delete trigger hooks -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Confirm Delete Trigger Modal Dialog -->
+  <div id="deleteConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-200/50 dark:border-gray-700 space-y-4">
+      <div class="flex items-center space-x-3 text-rose-500">
+        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        <h3 class="text-lg font-black dark:text-white">Konfirmasi Hapus</h3>
+      </div>
+      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+        Apakah Anda yakin ingin menghapus data konservasi ini secara permanen dari database Google Sheets? Tindakan ini tidak dapat dibatalkan.
+      </p>
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button onclick="closeDeleteModal()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition">
+          Batal
+        </button>
+        <button id="confirmDeleteBtn" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+          <i class="fa-regular fa-trash-can"></i>
+          <span>Hapus</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Loading Overlay -->
+  <div id="globalLoading" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-900/50 backdrop-blur-xs">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl flex items-center space-x-3">
+      <i class="fa-solid fa-circle-notch animate-spin text-brand-600 text-2xl"></i>
+      <span class="text-sm font-bold flex items-center">Memproses ke database...</span>
+    </div>
+  </div>
+
+  <script>
+    // Global fallback for local offline visual test
+    if (typeof google === 'undefined' || !google.script || !google.script.run) {
+      console.info("Google Apps Script API Offline. Menyiapkan simulator lokal.");
+      
+      window.localDB = {
+        'C.01': [
+          { 'ID': 'C.01-101', 'Satuan Kerja': 'Balai KSDA Kalimantan Timur', 'Bulan/Periode': 'Januari', 'Tahun': '2026', 'Nama Ilmiah Spesies': 'Pongo pygmaeus', 'Jml Indv yang dijumpai': '3', 'Longitude (X)': '116,5892', 'Latitude (Y)': '-0,4322', 'Tanggal Perjumpaan': '2026-01-15', 'Kategori Perjumpaan': 'Perjumpaan langsung', 'Keterangan': 'Induk dengan satu anak' }
+        ],
+        'C.02': [
+          { 'ID': 'C.02-202', 'Satuan Kerja': 'Balai KSDA Kalimantan Timur', 'Periode': 'Tahunan', 'Tahun': '2026', 'Nama Lembaga Konservasi': 'Taman Safari Prigen', 'Bentuk Lembaga Konservasi': 'Taman Safari', 'Alamat': 'Prigen, Pasuruan', 'Longitude (X)': '112,6541', 'Latitude (Y)': '-7,7421', 'Luas Areal (Ha)': '350', 'Nomor Perizinan': 'SK.12/MENHUT/2021', 'Tanggal Perizinan': '2021-04-10', 'Tanggal Berakhir Izin': '2031-04-10', 'Keterangan': 'Izin Aktif' }
+        ]
+      };
+
+      window.google = {
+        script: {
+          run: {
+            withSuccessHandler: function(successCallback) {
+              return {
+                withFailureHandler: function(failureCallback) {
+                  return {
+                    getRecentData: function(moduleCode) {
+                      setTimeout(() => {
+                        successCallback(window.localDB[moduleCode] || []);
+                      }, 400);
+                    },
+                    submitConservationData: function(moduleCode, fields) {
+                      setTimeout(() => {
+                        if (!window.localDB[moduleCode]) {
+                          window.localDB[moduleCode] = [];
+                        }
+                        
+                        if (fields.row_id) {
+                          let idx = window.localDB[moduleCode].findIndex(r => r.ID === fields.row_id);
+                          if (idx !== -1) {
+                            let updatedRow = Object.assign({}, fields);
+                            updatedRow.ID = fields.row_id;
+                            updatedRow['Satuan Kerja'] = 'Balai KSDA Kalimantan Timur';
+                            updatedRow['Tahun'] = fields.tahun;
+                            updatedRow['Bulan/Periode'] = fields.bulan_val || fields.triwulan_val || fields.semester_val || 'Tahunan';
+                            updatedRow['Periode'] = updatedRow['Bulan/Periode'];
+                            updatedRow['Nama Ilmiah Spesies'] = fields.spesies_val;
+                            updatedRow['Jml Indv yang dijumpai'] = fields.jumlah_val;
+                            updatedRow['Nama Lembaga Konservasi'] = fields.c02_lembaga;
+                            updatedRow['Bentuk Lembaga Konservasi'] = fields.c02_bentuk;
+                            updatedRow['Alamat'] = fields.c02_alamat;
+                            updatedRow['Longitude (X)'] = fields.c01_lng || fields.c02_lng;
+                            updatedRow['Latitude (Y)'] = fields.c01_lat || fields.c02_lat;
+                            updatedRow['Keterangan'] = fields.keterangan_val;
+                            window.localDB[moduleCode][idx] = updatedRow;
+                          }
+                        } else {
+                          let newId = moduleCode + "-" + Date.now();
+                          let newRow = {
+                            'ID': newId,
+                            'Satuan Kerja': 'Balai KSDA Kalimantan Timur',
+                            'Tahun': fields.tahun,
+                            'Bulan/Periode': fields.bulan_val || fields.triwulan_val || fields.semester_val || 'Tahunan',
+                            'Periode': fields.bulan_val || fields.triwulan_val || fields.semester_val || 'Tahunan',
+                            'Nama Ilmiah Spesies': fields.spesies_val,
+                            'Jml Indv yang dijumpai': fields.jumlah_val,
+                            'Nama Lembaga Konservasi': fields.c02_lembaga,
+                            'Bentuk Lembaga Konservasi': fields.c02_bentuk,
+                            'Alamat': fields.c02_alamat,
+                            'Longitude (X)': fields.c01_lng || fields.c02_lng || fields.c04_lng || fields.c06_lng || fields.c14_lng || fields.c15_lng || fields.c16_lng || fields.c17_lng,
+                            'Latitude (Y)': fields.c01_lat || fields.c02_lat || fields.c04_lat || fields.c06_lat || fields.c14_lat || fields.c15_lat || fields.c16_lat || fields.c17_lat,
+                            'Keterangan': fields.keterangan_val
+                          };
+                          window.localDB[moduleCode].push(newRow);
+                        }
+                        successCallback({ success: true, message: "Aksi Simulasi Sukses!" });
+                      }, 600);
+                    },
+                    deleteConservationData: function(moduleCode, id) {
+                      setTimeout(() => {
+                        if (window.localDB[moduleCode]) {
+                          window.localDB[moduleCode] = window.localDB[moduleCode].filter(r => r.ID !== id);
+                        }
+                        successCallback({ success: true, message: "Simulasi Hapus Sukses!" });
+                      }, 400);
+                    },
+                    setupDatabase: function() {
+                      setTimeout(() => successCallback({ success: true }), 100);
+                    }
+                  };
+                }
+              };
+            }
+          }
+        }
+      };
+    }
+
+    // Mapping Modules Specifications
+    const modulesMap = {
+      'C.01': { title: 'Perjumpaan Spesies', period: 'Bulanan', desc: 'Perjumpaan Spesies di dalam dan luar Kawasan Konservasi (C.01)' },
+      'C.02': { title: 'Lembaga Konservasi', period: 'Tahunan', desc: 'Lembaga Konservasi Umum dan Khusus (C.02)' },
+      'C.03': { title: 'Koleksi TSL di LK', period: 'Semester', desc: 'Koleksi TSL di Lembaga Konservasi (C.03)' },
+      'C.04': { title: 'Penangkaran TSL', period: 'Tahunan', desc: 'Penangkaran Tumbuhan dan Satwa Liar (C.04)' },
+      'C.05': { title: 'Jenis TSL Penangkar', period: 'Tahunan', desc: 'Jenis TSL yang ditangkarkan di Penangkaran (C.05)' },
+      'C.06': { title: 'Pengedar TSL', period: 'Tahunan', desc: 'Pengedar Tumbuhan dan Satwa Liar (C.06)' },
+      'C.08': { title: 'Penangkapan TSL', period: 'Triwulan', desc: 'Realisasi Penangkapan/Pengambilan Tumbuhan dan Satwa Liar (C.08)' },
+      'C.09': { title: 'Ekspor TSL Penangkaran', period: 'Triwulan', desc: 'Realisasi Ekspor Tumbuhan dan Satwa Liar Hasil Penangkaran (C.09)' },
+      'C.10': { title: 'Ekspor TSL Alam', period: 'Triwulan', desc: 'Realisasi Ekspor Tumbuhan dan Satwa Liar Pengambilan dari Alam (C.10)' },
+      'C.11': { title: 'Sitaan & Penyelamatan', period: 'Bulanan', desc: 'Rekapitulasi Sitaan, Penyerahan, dan Penyelamatan Satwa (C.11)' },
+      'C.12': { title: 'PNBP Pemanfaatan TSL', period: 'Bulanan', desc: 'PNBP dari Kegiatan Pemanfaatan Tumbuhan dan Satwa Liar (C.12)' },
+      'C.14': { title: 'Interaksi Negatif Satwa', period: 'Bulanan', desc: 'Interaksi Negatif Satwa Liar dan Manusia (C.14)' },
+      'C.15': { title: 'Pelepasliaran Satwa', period: 'Bulanan', desc: 'Rekapitulasi Pelepasliaran Kembali Satwa (C.15)' },
+      'C.16': { title: 'Kelahiran Satwa', period: 'Bulanan', desc: 'Rekapitulasi Kelahiran Satwa (C.16)' },
+      'C.17': { title: 'Kematian Satwa Liar', period: 'Bulanan', desc: 'Rekapitulasi Kematian Satwa Liar (C.17)' }
+    };
+
+    // Columns Mapping (Matches Code.gs headers configuration)
+    const columnsMap = {
+      'C.01': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Tanggal Perjumpaan', 'Kategori Perjumpaan', 'Nama Ilmiah Spesies', 'Jml Indv yang dijumpai', 'Longitude (X)', 'Latitude (Y)', 'Keterangan'],
+      'C.02': ['ID', 'Satuan Kerja', 'Tahun', 'Periode', 'Nama Lembaga Konservasi', 'Betuk Lembaga Konservasi', 'Alamat', 'Longitude (X)', 'Latitude (Y)', 'Luas Areal (Ha)', 'Nomor Perizinan', 'Tanggal Perizinan', 'Tanggal Berakhir Izin', 'Keterangan'],
+      'C.03': ['ID', 'Satuan Kerja', 'Tahun', 'Semester/Periode', 'Nama Lembaga Konservasi', 'Bentuk Lembaga Konservasi', 'Nama Ilmiah Spesies', 'Jantan', 'Betina', 'Belum Diketahui', 'Keterangan'],
+      'C.04': ['ID', 'Satuan Kerja', 'Tahun', 'Nama Penangkar', 'Alamat', 'Lokasi Unit Penangkaran', 'Longitude (X)', 'Latitude (Y)', 'Nomor Perizinan', 'Tanggal Perizinan', 'Tanggal Berakhir Izin', 'Luas Areal (Ha)', 'Keterangan'],
+      'C.05': ['ID', 'Satuan Kerja', 'Tahun', 'Periode', 'Nama Penangkar', 'Nama Ilmiah Spesies', 'Jumlah Indukan', 'Hasil Penangkaran', 'Hasil Pemanfaatan Tahun ini', 'Sisa Stok Hasil Pemanfaatan', 'Keterangan'],
+      'C.06': ['ID', 'Satuan Kerja', 'Tahun', 'Periode', 'Nama Pengedar', 'Kategori', 'Lokasi Unit Pengedar', 'Longitude (X)', 'Latitude (Y)', 'Nomor Perizinan', 'Tanggal Perizinan', 'Tanggal Berakhir Izin', 'Spesies yang Diedarkan', 'Keterangan'],
+      'C.08': ['ID', 'Satuan Kerja', 'Tahun', 'Triwulan/Periode', 'Nama Spesies', 'Jenis', 'Provinsi', 'Volume Realisasi Tangkap', 'Satuan Realisasi Tangkap', 'Keterangan'],
+      'C.09': ['ID', 'Satuan Kerja', 'Tahun', 'Triwulan/Periode', 'Nama Penangkar', 'Nama Spesies', 'Jenis', 'Negara', 'Volume Kuota Ekspor', 'Satuan Kuota Ekspor', 'Volume Realisasi Ekspor', 'Satuan Realisasi Ekspor', 'Keterangan'],
+      'C.10': ['ID', 'Satuan Kerja', 'Tahun', 'Triwulan/Periode', 'Nama Pengedar TSL', 'Nama Spesies', 'Jenis', 'Negara', 'Volume Kuota Ekspor', 'Satuan Kuota Ekspor', 'Volume Realisasi Ekspor', 'Satuan Realisasi Ekspor', 'Keterangan'],
+      'C.11': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Spesies', 'Asal-usul', 'Jml Jenis Kelamin Jantan', 'Jml Jenis Kelamin Betina', 'Jml Jenis Kelamin Belum Diketahui', 'Keterangan'],
+      'C.12': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Akun PNBP', 'Realisasi Bulan ini', 'Keterangan'],
+      'C.14': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Spesies', 'Tanggal Kejadian', 'Jml Indv', 'Longitude (X)', 'Latitude (Y)', 'Korban Manusia Meninggal', 'Korban Manusia Cedera', 'Kerusakan Kebun/Lahan Masy (m2)', 'Kerusakan Bangunan', 'Korban Kambing', 'Korban Sapi', 'Korban Kerbau', 'Korban Anjing', 'Korban Babi', 'Korban Unggas', 'Korban Satwa Mati', 'Taksiran Kerugian (Rp)', 'Upaya Penanggulangan', 'Keterangan'],
+      'C.15': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Spesies', 'Jml Indv', 'Asal-usul', 'Longitude (X)', 'Latitude (Y)', 'Keterangan'],
+      'C.16': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Satwa', 'Tanggal Kelahiran', 'Jumlah Jantan', 'Jumlah Betina', 'Jumlah Belum Diketahui', 'Longitude (X)', 'Latitude (Y)', 'Usulan Nama Satwa', 'Keterangan'],
+      'C.17': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Satwa', 'Tanggal Kematian', 'Jumlah Jantan', 'Jumlah Betina', 'Jumlah Belum Diketahui', 'Perkiraan Usia Satwa', 'Penyebab Kematian', 'Longitude (X)', 'Latitude (Y)', 'Upaya Penanganan', 'Keterangan']
+    };
+
+    let loadedHistoryRecords = []; // Keep cache in local memory
+    let targetDeleteId = null;
+    let targetDeleteModule = null;
+    let activeFilter = 'Bulanan'; 
+
+    // Theme Switcher Config
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElement = document.documentElement;
+
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      htmlElement.classList.add('dark');
+      themeIcon.className = "fa-solid fa-sun text-yellow-400";
+    } else {
+      htmlElement.classList.remove('dark');
+      themeIcon.className = "fa-solid fa-moon text-gray-600";
+    }
+
+    themeToggle.addEventListener('click', () => {
+      if (htmlElement.classList.contains('dark')) {
+        htmlElement.classList.remove('dark');
+        themeIcon.className = "fa-solid fa-moon text-gray-600";
+        localStorage.theme = 'light';
+      } else {
+        htmlElement.classList.add('dark');
+        themeIcon.className = "fa-solid fa-sun text-yellow-400";
+        localStorage.theme = 'dark';
+      }
+    });
+
+    function sanitizeCoordinate(input) {
+      let value = input.value.replace(/\./g, ',');
+      let sanitized = '';
+      let hasComma = false;
+      
+      for (let i = 0; i < value.length; i++) {
+        let char = value[i];
+        if (char === '-' && i === 0) {
+          sanitized += '-';
+        } else if (char === ',') {
+          if (!hasComma) {
+            sanitized += ',';
+            hasComma = true;
+          }
+        } else if (/\d/.test(char)) {
+          sanitized += char;
+        }
+      }
+      
+      if (input.value !== sanitized) {
+        input.value = sanitized;
+      }
+    }
+
+    function filterPeriod(period) {
+      activeFilter = period;
+      document.querySelectorAll('.period-tab').forEach(b => {
+        b.classList.remove('bg-brand-600', 'text-white', 'dark:bg-brand-500');
+        b.classList.add('text-gray-500', 'dark:text-gray-400');
+      });
+      const activeBtn = document.getElementById('btn-p-' + period);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-gray-500', 'dark:text-gray-400');
+        activeBtn.classList.add('bg-brand-600', 'text-white');
+      }
+      renderModuleButtons();
+    }
+
+    function renderModuleButtons() {
+      const container = document.getElementById('moduleList');
+      container.innerHTML = '';
+      
+      const activeModuleCode = document.getElementById('activeModule').value;
+      
+      Object.keys(modulesMap).forEach(code => {
+        const item = modulesMap[code];
+        
+        if (item.period !== activeFilter) {
+          return;
+        }
+        
+        const isActive = activeModuleCode === code;
+        
+        const colorBadge = item.period === 'Bulanan' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300' :
+                           item.period === 'Triwulan' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300' :
+                           item.period === 'Semester' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/50 dark:text-purple-300' :
+                           'bg-teal-100 text-teal-800 dark:bg-teal-950/50 dark:text-teal-300';
+        
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => selectModule(code);
+        btn.className = `w-full text-left p-4 rounded-2xl border transition-all flex items-start justify-between space-x-3 ${
+          isActive 
+            ? 'bg-brand-50 border-brand-500/50 dark:bg-brand-950/20 dark:border-brand-500/50 ring-1 ring-brand-500/50' 
+            : 'bg-gray-50/50 border-gray-100 hover:bg-gray-100 dark:bg-gray-900/50 dark:border-gray-800 dark:hover:bg-gray-800'
+        }`;
+        
+        btn.innerHTML = `
+          <div class="space-y-1">
+            <span class="text-[10px] font-extrabold text-brand-600 dark:text-brand-400 tracking-wider">${code}</span>
+            <p class="text-xs font-bold text-gray-800 dark:text-white leading-snug">${item.title}</p>
+          </div>
+          <span class="text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase shrink-0 ${colorBadge}">${item.period}</span>
+        `;
+        
+        container.appendChild(btn);
+      });
+    }
+
+    function selectModule(moduleCode) {
+      exitEditMode();
+      
+      const config = modulesMap[moduleCode];
+      
+      document.getElementById('activeModule').value = moduleCode;
+      document.getElementById('activePeriodType').value = config.period;
+      
+      document.getElementById('formTitle').innerText = config.desc;
+      document.getElementById('formSub').innerText = "Modul " + moduleCode + " • Periode " + config.period;
+      document.getElementById('moduleTag').innerText = moduleCode + " - " + config.period;
+      document.getElementById('rekapTitle').innerText = "Database: " + config.title;
+      
+      renderPeriodFields(config.period);
+      renderDynamicFields(moduleCode);
+      renderModuleButtons();
+      loadHistoryData();
+      
+      hideAlert();
+    }
+
+    function renderPeriodFields(periodType) {
+      const container = document.getElementById('dynamicPeriodContainer');
+      container.innerHTML = '';
+      
+      if (periodType === 'Bulanan') {
+        container.innerHTML = `
+          <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Pilih Bulan Laporan <span class="text-red-500">*</span></label>
+          <select name="bulan_val" id="field_bulan_val" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            <option value="Januari">Januari</option>
+            <option value="Februari">Februari</option>
+            <option value="Maret">Maret</option>
+            <option value="April">April</option>
+            <option value="Mei">Mei</option>
+            <option value="Juni">Juni</option>
+            <option value="Juli">Juli</option>
+            <option value="Agustus">Agustus</option>
+            <option value="September">September</option>
+            <option value="Oktober">Oktober</option>
+            <option value="November">November</option>
+            <option value="Desember">Desember</option>
+          </select>
+          <input type="hidden" name="period_type" value="Bulanan">
+        `;
+      } else if (periodType === 'Triwulan') {
+        container.innerHTML = `
+          <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Pilih Triwulan <span class="text-red-500">*</span></label>
+          <select name="triwulan_val" id="field_triwulan_val" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            <option value="Triwulan I">Triwulan I</option>
+            <option value="Triwulan II">Triwulan II</option>
+            <option value="Triwulan III">Triwulan III</option>
+            <option value="Triwulan IV">Triwulan IV</option>
+          </select>
+          <input type="hidden" name="period_type" value="Triwulan">
+        `;
+      } else if (periodType === 'Semester') {
+        container.innerHTML = `
+          <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Pilih Semester <span class="text-red-500">*</span></label>
+          <select name="semester_val" id="field_semester_val" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            <option value="Semester I">Semester I</option>
+            <option value="Semester II">Semester II</option>
+          </select>
+          <input type="hidden" name="period_type" value="Semester">
+        `;
+      } else {
+        container.innerHTML = `
+          <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Format Laporan</label>
+          <div class="h-11 px-4 text-sm rounded-xl border border-gray-200 dark:border-gray-700 flex items-center bg-gray-100 dark:bg-gray-800 font-bold select-none text-gray-500">
+            Kumulatif Tahunan (Satu Tahun Penuh)
+          </div>
+          <input type="hidden" name="period_type" value="Tahunan">
+        `;
+      }
+    }
+
+    function renderDynamicFields(moduleCode) {
+      const container = document.getElementById('dynamicFields');
+      container.innerHTML = '';
+      
+      let html = '';
+      
+      switch(moduleCode) {
+        case 'C.01':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Spesies <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Ardea alba" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Individu <span class="text-red-500">*</span></label>
+              <input type="number" name="jumlah_val" id="field_jumlah_val" required min="1" placeholder="Contoh: 15" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Perjumpaan <span class="text-red-500">*</span></label>
+              <input type="date" name="c01_tanggal" id="field_c01_tanggal" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Kategori Perjumpaan <span class="text-red-500">*</span></label>
+              <select name="c01_kategori" id="field_c01_kategori" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="Perjumpaan langsung">Perjumpaan langsung</option>
+                <option value="Jejak">Jejak</option>
+                <option value="Sarang">Sarang</option>
+                <option value="Feses">Feses</option>
+                <option value="Suara">Suara</option>
+                <option value="Cakaran">Cakaran</option>
+                <option value="Kamera jebak">Kamera jebak</option>
+                <option value="Lain-lain">Lain-lain</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c01_lng" id="field_c01_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c01_lat" id="field_c01_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" placeholder="Keterangan tambahan..." class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.02':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Lembaga Konservasi <span class="text-red-500">*</span></label>
+              <input type="text" name="c02_lembaga" id="field_c02_lembaga" required placeholder="Contoh: Ragunan / Taman Safari" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Bentuk Lembaga Konservasi <span class="text-red-500">*</span></label>
+              <select name="c02_bentuk" id="field_c02_bentuk" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="Kebun Binatang">Kebun Binatang</option>
+                <option value="Taman Safari">Taman Safari</option>
+                <option value="Taman Satwa">Taman Satwa</option>
+                <option value="Pusat Penyelamatan Satwa">Pusat Penyelamatan Satwa</option>
+                <option value="Pusat Rehabilitasi Satwa">Pusat Rehabilitasi Satwa</option>
+                <option value="Museum Zoologi">Museum Zoologi</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Alamat Lengkap <span class="text-red-500">*</span></label>
+              <input type="text" name="c02_alamat" id="field_c02_alamat" required placeholder="Contoh: Jl. Slamet Riyadi No.10" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c02_lng" id="field_c02_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c02_lat" id="field_c02_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Luas Areal (Ha) <span class="text-red-500">*</span></label>
+              <input type="number" step="any" name="c02_luas" id="field_c02_luas" required placeholder="Contoh: 15,5" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nomor Perizinan <span class="text-red-500">*</span></label>
+              <input type="text" name="c02_izin_no" id="field_c02_izin_no" required placeholder="Contoh: SK.123/MENHUT/..." class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Perizinan <span class="text-red-500">*</span></label>
+              <input type="date" name="c02_izin_tgl" id="field_c02_izin_tgl" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Berakhir Izin <span class="text-red-500">*</span></label>
+              <input type="date" name="c02_izin_akhir" id="field_c02_izin_akhir" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.03':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Lembaga Konservasi <span class="text-red-500">*</span></label>
+              <input type="text" name="c03_lembaga" id="field_c03_lembaga" required placeholder="Contoh: Ragunan" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Bentuk Lembaga Konservasi <span class="text-red-500">*</span></label>
+              <select name="c03_bentuk" id="field_c03_bentuk" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="Kebun Binatang">Kebun Binatang</option>
+                <option value="Taman Safari">Taman Safari</option>
+                <option value="Taman Satwa">Taman Satwa</option>
+                <option value="Pusat Penyelamatan Satwa">Pusat Penyelamatan Satwa</option>
+                <option value="Pusat Rehabilitasi Satwa">Pusat Rehabilitasi Satwa</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Spesies <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Panthera tigris" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Jantan (Ekor) <span class="text-red-500">*</span></label>
+              <input type="number" name="c03_jantan" id="field_c03_jantan" min="0" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Betina (Ekor) <span class="text-red-500">*</span></label>
+              <input type="number" name="c03_betina" id="field_c03_betina" min="0" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Unknown Sex <span class="text-red-500">*</span></label>
+              <input type="number" name="c03_unknown" id="field_c03_unknown" min="0" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.04':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Penangkar <span class="text-red-500">*</span></label>
+              <input type="text" name="c04_penangkar" id="field_c04_penangkar" required placeholder="Nama Penangkar" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Lokasi Unit Penangkaran <span class="text-red-500">*</span></label>
+              <input type="text" name="c04_lokasi" id="field_c04_lokasi" required placeholder="Unit Lokasi" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Alamat Lengkap Penangkar <span class="text-red-500">*</span></label>
+              <input type="text" name="c04_alamat" id="field_c04_alamat" required placeholder="Alamat unit" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c04_lng" id="field_c04_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c04_lat" id="field_c04_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Luas Areal (Ha) <span class="text-red-500">*</span></label>
+              <input type="number" step="any" name="c04_luas" id="field_c04_luas" required placeholder="Luas area" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nomor Perizinan <span class="text-red-500">*</span></label>
+              <input type="text" name="c04_izin" id="field_c04_izin" required placeholder="No. SK Izin" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Perizinan <span class="text-red-500">*</span></label>
+              <input type="date" name="c04_izin_tgl" id="field_c04_izin_tgl" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Berakhir Izin <span class="text-red-500">*</span></label>
+              <input type="date" name="c04_izin_akhir" id="field_c04_izin_akhir" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.05':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Penangkar <span class="text-red-500">*</span></label>
+              <input type="text" name="c05_penangkar" id="field_c05_penangkar" required placeholder="Nama Penangkar" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Spesies TSL <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Scleropages formosus" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Indukan <span class="text-red-500">*</span></label>
+              <input type="number" name="c05_indukan" id="field_c05_indukan" required min="0" placeholder="Jumlah Indukan" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Hasil Breeding (F1/F2) <span class="text-red-500">*</span></label>
+              <input type="number" name="c05_hasil_breeding" id="field_c05_hasil_breeding" required min="0" placeholder="Hasil Breeding" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Hasil Pemanfaatan Tahun Ini <span class="text-red-500">*</span></label>
+              <input type="number" name="c05_pemanfaatan" id="field_c05_pemanfaatan" required min="0" placeholder="Pemanfaatan" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Sisa Stok Hasil Pemanfaatan <span class="text-red-500">*</span></label>
+              <input type="number" name="c05_sisa" id="field_c05_sisa" required min="0" placeholder="Sisa Stok" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.06':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Pengedar <span class="text-red-500">*</span></label>
+              <input type="text" name="c06_pengedar" id="field_c06_pengedar" required placeholder="Nama Pengedar" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Kategori Pengedar <span class="text-red-500">*</span></label>
+              <select name="c06_kategori" id="field_c06_kategori" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="Dalam Negeri">Dalam Negeri</option>
+                <option value="Luar Negeri">Luar Negeri</option>
+                <option value="Dalam & Luar Negeri">Dalam & Luar Negeri</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Lokasi Unit Pengedar <span class="text-red-500">*</span></label>
+              <input type="text" name="c06_lokasi" id="field_c06_lokasi" required placeholder="Lokasi Penjualan/Unit" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c06_lng" id="field_c06_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c06_lat" id="field_c06_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nomor Perizinan <span class="text-red-500">*</span></label>
+              <input type="text" name="c06_izin" id="field_c06_izin" required placeholder="No. Izin Edar" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Perizinan <span class="text-red-500">*</span></label>
+              <input type="date" name="c06_izin_tgl" id="field_c06_izin_tgl" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Berakhir Izin <span class="text-red-500">*</span></label>
+              <input type="date" name="c06_izin_akhir" id="field_c06_izin_akhir" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Spesies Diedarkan <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Arwana, Gaharu" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.08':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Spesies TSL <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Nama Ilmiah / Lokal" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jenis Satwa/Tumbuhan <span class="text-red-500">*</span></label>
+              <input type="text" name="c08_jenis" id="field_c08_jenis" required placeholder="Flora / Fauna / Kulit / Gaharu" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Provinsi Pengambilan <span class="text-red-500">*</span></label>
+              <input type="text" name="c08_provinsi" id="field_c08_provinsi" required placeholder="Contoh: Kalimantan Timur" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Volume Realisasi Tangkap <span class="text-red-500">*</span></label>
+              <input type="number" step="any" name="c08_volume" id="field_c08_volume" required placeholder="Volume Realisasi" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Satuan Realisasi <span class="text-red-500">*</span></label>
+              <input type="text" name="c08_satuan" id="field_c08_satuan" required placeholder="Ekor / Kg / Pcs" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.09':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Penangkar <span class="text-red-500">*</span></label>
+              <input type="text" name="c09_penangkar" id="field_c09_penangkar" required placeholder="Nama Penangkar" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Spesies TSL <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Nama Ilmiah" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jenis Ekspor TSL <span class="text-red-500">*</span></label>
+              <input type="text" name="c09_jenis" id="field_c09_jenis" required placeholder="Kulit / Offset / Live / F2" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Negara Tujuan Ekspor <span class="text-red-500">*</span></label>
+              <input type="text" name="c09_negara" id="field_c09_negara" required placeholder="Contoh: Jepang, China" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Volume Kuota Ekspor <span class="text-red-500">*</span></label>
+              <input type="number" step="any" name="c09_kuota" id="field_c09_kuota" required placeholder="Kuota" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Satuan Kuota Ekspor <span class="text-red-500">*</span></label>
+              <input type="text" name="c09_kuota_satuan" id="field_c09_kuota_satuan" required placeholder="Contoh: Pcs, Ekor, Kg" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Volume Realisasi Ekspor <span class="text-red-500">*</span></label>
+              <input type="number" step="any" name="c09_realisasi" id="field_c09_realisasi" required placeholder="Realisasi" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Satuan Realisasi Ekspor <span class="text-red-500">*</span></label>
+              <input type="text" name="c09_realisasi_satuan" id="field_c09_realisasi_satuan" required placeholder="Contoh: Pcs, Ekor" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.10':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Pengedar TSL <span class="text-red-500">*</span></label>
+              <input type="text" name="c10_pengedar" id="field_c10_pengedar" required placeholder="Nama Pengedar TSL" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Spesies Alam <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Spesies Alam" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jenis Ekspor TSL <span class="text-red-500">*</span></label>
+              <input type="text" name="c10_jenis" id="field_c10_jenis" required placeholder="Kayu / Gaharu / Hidup" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Negara Tujuan Ekspor <span class="text-red-500">*</span></label>
+              <input type="text" name="c10_negara" id="field_c10_negara" required placeholder="Singapura / Amerika" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Volume Kuota Ekspor <span class="text-red-500">*</span></label>
+              <input type="number" step="any" name="c10_kuota" id="field_c10_kuota" required placeholder="Kuota" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Satuan Kuota Ekspor <span class="text-red-500">*</span></label>
+              <input type="text" name="c10_kuota_satuan" id="field_c10_kuota_satuan" required placeholder="Kg / Liter / Pcs" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Volume Realisasi Ekspor <span class="text-red-500">*</span></label>
+              <input type="number" step="any" name="c10_realisasi" id="field_c10_realisasi" required placeholder="Realisasi" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Satuan Realisasi Ekspor <span class="text-red-500">*</span></label>
+              <input type="text" name="c10_realisasi_satuan" id="field_c10_realisasi_satuan" required placeholder="Kg / Liter / Pcs" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.11':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Spesies <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Nycticebus coucang" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Asal-usul Penemuan <span class="text-red-500">*</span></label>
+              <select name="c11_asal" id="field_c11_asal" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="Hasil Operasi">Hasil Operasi / Sitaan</option>
+                <option value="Hasil Penyerahan">Hasil Penyerahan Sukarela</option>
+                <option value="Hasil Penyelamatan">Hasil Penyelamatan (Rescue)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Jantan (Ekor) <span class="text-red-500">*</span></label>
+              <input type="number" name="c11_jantan" id="field_c11_jantan" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Betina (Ekor) <span class="text-red-500">*</span></label>
+              <input type="number" name="c11_betina" id="field_c11_betina" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Unknown Sex <span class="text-red-500">*</span></label>
+              <input type="number" name="c11_unknown" id="field_c11_unknown" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan Kondisi & Lokasi</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" placeholder="Catatan fisik satwa saat diselamatkan..." class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.12':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Akun PNBP Terkait <span class="text-red-500">*</span></label>
+              <select name="c12_akun" id="field_c12_akun" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="423731 - Pungutan Pengambilan TSL">423731 - Pungutan Mengambil/Menangkap TSL di Kawasan</option>
+                <option value="423732 - Pungutan Izin Usaha Pariwisata Alam">423732 - Pendapatan Pungutan Izin Pengusahaan Pariwisata Alam</option>
+                <option value="425255 - Perizinan Lingkungan Hidup & Kehutanan">425255 - Pendapatan Perizinan Bidang LHK</option>
+                <option value="425611 - Pendapatan Wisata Alam">425611 - Pendapatan Wisata Alam</option>
+                <option value="425619 - Pendapatan jasa dibidang LHK lainnya">425619 - Pendapatan jasa dibidang LHK lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Realisasi Setoran Bulan Ini (Rp) <span class="text-red-500">*</span></label>
+              <input type="number" name="c12_realisasi" id="field_c12_realisasi" required placeholder="Contoh: 15000000" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan / Uraian NTPN</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" placeholder="Uraian wajib bayar dan nomor billing..." class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.14':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Spesies Satwa <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Elephas maximus" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Kejadian <span class="text-red-500">*</span></label>
+              <input type="date" name="c14_tanggal" id="field_c14_tanggal" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Individu Satwa Terlibat <span class="text-red-500">*</span></label>
+              <input type="number" name="jumlah_val" id="field_jumlah_val" required min="1" placeholder="Jumlah" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c14_lng" id="field_c14_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c14_lat" id="field_c14_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Korban Manusia Meninggal <span class="text-red-500">*</span></label>
+              <input type="number" name="c14_mati" id="field_c14_mati" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Korban Manusia Luka/Cedera <span class="text-red-500">*</span></label>
+              <input type="number" name="c14_luka" id="field_c14_luka" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Kerusakan Kebun/Lahan (m²)</label>
+              <input type="number" name="c14_kebun" id="field_c14_kebun" min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Kerusakan Bangunan (Unit)</label>
+              <input type="number" name="c14_bangunan" id="field_c14_bangunan" min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Korban Ternak Warga</label>
+              <input type="text" name="c14_ternak" id="field_c14_ternak" placeholder="3 Kambing, 1 Sapi dsb" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Korban Satwa Mati (Ekor) <span class="text-red-500">*</span></label>
+              <input type="number" name="c14_satwa_mati" id="field_c14_satwa_mati" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Taksiran Kerugian (Rp) <span class="text-red-500">*</span></label>
+              <input type="number" name="c14_rugi" id="field_c14_rugi" required placeholder="Estimasi rupiah" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Upaya Penanggulangan <span class="text-red-500">*</span></label>
+              <textarea name="c14_upaya" id="field_c14_upaya" rows="2" required placeholder="Eskalasi rescue, bunyi-bunyian..." class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.15':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Spesies <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Pongo pygmaeus" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Individu (Ekor) <span class="text-red-500">*</span></label>
+              <input type="number" name="jumlah_val" id="field_jumlah_val" required min="1" placeholder="Jumlah rilis" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Asal-usul Satwa <span class="text-red-500">*</span></label>
+              <input type="text" name="c15_asal" id="field_c15_asal" required placeholder="Pusat Penyelamatan / Serahan Warga" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c15_lng" id="field_c15_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c15_lat" id="field_c15_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan Lokasi Rilis</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" placeholder="Nama hutan lindung/konservasi rilis..." class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.16':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Satwa <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Panthera tigris sumatrae" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Kelahiran <span class="text-red-500">*</span></label>
+              <input type="date" name="c16_tanggal" id="field_c16_tanggal" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Kelahiran Jantan <span class="text-red-500">*</span></label>
+              <input type="number" name="c16_jantan" id="field_c16_jantan" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Kelahiran Betina <span class="text-red-500">*</span></label>
+              <input type="number" name="c16_betina" id="field_c16_betina" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Unknown Sex <span class="text-red-500">*</span></label>
+              <input type="number" name="c16_unknown" id="field_c16_unknown" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Usulan Nama Satwa</label>
+              <input type="text" name="c16_nama_usul" id="field_c16_nama_usul" placeholder="Contoh: Elang Sakti" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c16_lng" id="field_c16_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c16_lat" id="field_c16_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        case 'C.17':
+          html = `
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Nama Ilmiah Satwa <span class="text-red-500">*</span></label>
+              <input type="text" name="spesies_val" id="field_spesies_val" required placeholder="Contoh: Elephas maximus" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Tanggal Kematian <span class="text-red-500">*</span></label>
+              <input type="date" name="c17_tanggal" id="field_c17_tanggal" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Mati Jantan <span class="text-red-500">*</span></label>
+              <input type="number" name="c17_jantan" id="field_c17_jantan" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Jumlah Mati Betina <span class="text-red-500">*</span></label>
+              <input type="number" name="c17_betina" id="field_c17_betina" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Unknown Sex <span class="text-red-500">*</span></label>
+              <input type="number" name="c17_unknown" id="field_c17_unknown" required min="0" placeholder="0" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Perkiraan Usia Satwa <span class="text-red-500">*</span></label>
+              <select name="c17_usia" id="field_c17_usia" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="Anakan">Anakan</option>
+                <option value="Remaja">Remaja</option>
+                <option value="Dewasa">Dewasa</option>
+                <option value="Tidak teridentifikasi">Tidak teridentifikasi</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Penyebab Kematian <span class="text-red-500">*</span></label>
+              <select name="c17_penyebab" id="field_c17_penyebab" required class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+                <option value="Alamiah">Alamiah</option>
+                <option value="Kegiatan Ilegal">Kegiatan Ilegal</option>
+                <option value="Penyakit">Penyakit</option>
+                <option value="Penyebab Lainnya">Penyebab Lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Longitude (X) <span class="text-red-500">*</span></label>
+              <input type="text" name="c17_lng" id="field_c17_lng" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: 116,5892" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Latitude (Y) <span class="text-red-500">*</span></label>
+              <input type="text" name="c17_lat" id="field_c17_lat" required oninput="sanitizeCoordinate(this)" placeholder="Contoh: -0,4322" class="w-full h-11 px-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Upaya Penanganan <span class="text-red-500">*</span></label>
+              <textarea name="c17_upaya" id="field_c17_upaya" rows="2" required placeholder="Nekropsi tim medis, pemusnahan..." class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">Keterangan</label>
+              <textarea name="keterangan_val" id="field_keterangan_val" rows="2" class="w-full p-4 text-sm rounded-xl bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-brand-500 outline-none transition"></textarea>
+            </div>
+          `;
+          break;
+        default:
+          html = `<p class="text-sm text-gray-500">Form untuk modul ${moduleCode} dalam pengembangan.</p>`;
+      }
+      
+      container.innerHTML = html;
+    }
+
+    function enterEditMode(recordId) {
+      const record = loadedHistoryRecords.find(r => r.ID === recordId);
+      if (!record) return;
+      
+      hideAlert();
+      
+      // Update element states to edit mode
+      document.getElementById('editRowId').value = recordId;
+      document.getElementById('editModeBadge').classList.remove('hidden');
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+      document.getElementById('resetBtn').classList.add('hidden');
+      
+      document.getElementById('submitBtnText').innerText = "Simpan Perubahan";
+      document.getElementById('submitBtnIcon').className = "fa-solid fa-floppy-disk";
+      document.getElementById('submitBtn').className = "px-6 py-3 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center space-x-2";
+
+      // Populate base fields
+      if (document.getElementById('field_unit_kerja')) document.getElementById('field_unit_kerja').value = record['Satuan Kerja'] || 'Balai KSDA Kalimantan Timur';
+      if (document.getElementById('field_tahun')) document.getElementById('field_tahun').value = record['Tahun'] || '2026';
+      
+      // Populate period selectors
+      const pType = document.getElementById('activePeriodType').value;
+      const periodVal = record['Bulan/Periode'] || record['Triwulan/Periode'] || record['Semester/Periode'] || record['Periode'] || '';
+      
+      if (pType === 'Bulanan' && document.getElementById('field_bulan_val')) {
+        document.getElementById('field_bulan_val').value = periodVal;
+      } else if (pType === 'Triwulan' && document.getElementById('field_triwulan_val')) {
+        document.getElementById('field_triwulan_val').value = periodVal;
+      } else if (pType === 'Semester' && document.getElementById('field_semester_val')) {
+        document.getElementById('field_semester_val').value = periodVal;
+      }
+
+      // Populate dynamic modular inputs based on loaded cache
+      if (document.getElementById('field_spesies_val')) {
+        document.getElementById('field_spesies_val').value = record['Nama Ilmiah Spesies'] || record['Nama Ilmiah Satwa'] || record['Spesies yang Diedarkan'] || record['Nama Spesies'] || '';
+      }
+      if (document.getElementById('field_jumlah_val')) {
+        document.getElementById('field_jumlah_val').value = record['Jml Indv yang dijumpai'] || record['Jumlah'] || record['Jml Indv'] || record['Jumlah Indukan'] || '';
+      }
+      if (document.getElementById('field_keterangan_val')) {
+        document.getElementById('field_keterangan_val').value = record['Keterangan'] || '';
+      }
+
+      // Lat-Lng mapping
+      const lngVal = record['Longitude (X)'] || '';
+      const latVal = record['Latitude (Y)'] || '';
+      
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        if (input.name.includes('lng')) input.value = lngVal;
+        if (input.name.includes('lat')) input.value = latVal;
+      });
+
+      // Special custom fields map per modules
+      const mapSpecialField = (elementId, apiKey) => {
+        const el = document.getElementById(elementId);
+        if (el && record[apiKey] !== undefined) {
+          el.value = record[apiKey];
+        }
+      };
+
+      mapSpecialField('field_c01_tanggal', 'Tanggal Perjumpaan');
+      mapSpecialField('field_c01_kategori', 'Kategori Perjumpaan');
+      
+      mapSpecialField('field_c02_lembaga', 'Nama Lembaga Konservasi');
+      mapSpecialField('field_c02_bentuk', 'Betuk Lembaga Konservasi'); // Sesuai typo header sheet
+      mapSpecialField('field_c02_alamat', 'Alamat');
+      mapSpecialField('field_c02_luas', 'Luas Areal (Ha)');
+      mapSpecialField('field_c02_izin_no', 'Nomor Perizinan');
+      mapSpecialField('field_c02_izin_tgl', 'Tanggal Perizinan');
+      mapSpecialField('field_c02_izin_akhir', 'Tanggal Berakhir Izin');
+
+      mapSpecialField('field_c03_lembaga', 'Nama Lembaga Konservasi');
+      mapSpecialField('field_c03_bentuk', 'Bentuk Lembaga Konservasi');
+      mapSpecialField('field_c03_jantan', 'Jantan');
+      mapSpecialField('field_c03_betina', 'Betina');
+      mapSpecialField('field_c03_unknown', 'Belum Diketahui');
+
+      mapSpecialField('field_c04_penangkar', 'Nama Penangkar');
+      mapSpecialField('field_c04_lokasi', 'Lokasi Unit Penangkaran');
+      mapSpecialField('field_c04_alamat', 'Alamat');
+      mapSpecialField('field_c04_luas', 'Luas Areal (Ha)');
+      mapSpecialField('field_c04_izin', 'Nomor Perizinan');
+      mapSpecialField('field_c04_izin_tgl', 'Tanggal Perizinan');
+      mapSpecialField('field_c04_izin_akhir', 'Tanggal Berakhir Izin');
+
+      mapSpecialField('field_c05_penangkar', 'Nama Penangkar');
+      mapSpecialField('field_c05_indukan', 'Jumlah Indukan');
+      mapSpecialField('field_c05_hasil_breeding', 'Hasil Penangkaran');
+      mapSpecialField('field_c05_pemanfaatan', 'Hasil Pemanfaatan Tahun ini');
+      mapSpecialField('field_c05_sisa', 'Sisa Stok Hasil Pemanfaatan');
+
+      mapSpecialField('field_c06_pengedar', 'Nama Pengedar');
+      mapSpecialField('field_c06_kategori', 'Kategori');
+      mapSpecialField('field_c06_lokasi', 'Lokasi Unit Pengedar');
+      mapSpecialField('field_c06_izin', 'Nomor Perizinan');
+      mapSpecialField('field_c06_izin_tgl', 'Tanggal Perizinan');
+      mapSpecialField('field_c06_izin_akhir', 'Tanggal Berakhir Izin');
+
+      mapSpecialField('field_c08_jenis', 'Jenis');
+      mapSpecialField('field_c08_provinsi', 'Provinsi');
+      mapSpecialField('field_c08_volume', 'Volume Realisasi Tangkap');
+      mapSpecialField('field_c08_satuan', 'Satuan Realisasi Tangkap');
+
+      mapSpecialField('field_c09_penangkar', 'Nama Penangkar');
+      mapSpecialField('field_c09_jenis', 'Jenis');
+      mapSpecialField('field_c09_negara', 'Negara');
+      mapSpecialField('field_c09_kuota', 'Volume Kuota Ekspor');
+      mapSpecialField('field_c09_kuota_satuan', 'Satuan Kuota Ekspor');
+      mapSpecialField('field_c09_realisasi', 'Volume Realisasi Ekspor');
+      mapSpecialField('field_c09_realisasi_satuan', 'Satuan Realisasi Ekspor');
+
+      mapSpecialField('field_c10_pengedar', 'Nama Pengedar TSL');
+      mapSpecialField('field_c10_jenis', 'Jenis');
+      mapSpecialField('field_c10_negara', 'Negara');
+      mapSpecialField('field_c10_kuota', 'Volume Kuota Ekspor');
+      mapSpecialField('field_c10_kuota_satuan', 'Satuan Kuota Ekspor');
+      mapSpecialField('field_c10_realisasi', 'Volume Realisasi Ekspor');
+      mapSpecialField('field_c10_realisasi_satuan', 'Satuan Realisasi Ekspor');
+
+      mapSpecialField('field_c11_asal', 'Asal-usul');
+      mapSpecialField('field_c11_jantan', 'Jml Jenis Kelamin Jantan');
+      mapSpecialField('field_c11_betina', 'Jml Jenis Kelamin Betina');
+      mapSpecialField('field_c11_unknown', 'Jml Jenis Kelamin Belum Diketahui');
+
+      mapSpecialField('field_c12_akun', 'Akun PNBP');
+      mapSpecialField('field_c12_realisasi', 'Realisasi Bulan ini');
+
+      mapSpecialField('field_c14_tanggal', 'Tanggal Kejadian');
+      mapSpecialField('field_c14_mati', 'Korban Manusia Meninggal');
+      mapSpecialField('field_c14_luka', 'Korban Manusia Cedera');
+      mapSpecialField('field_c14_kebun', 'Kerusakan Kebun/Lahan Masy (m2)');
+      mapSpecialField('field_c14_bangunan', 'Kerusakan Bangunan');
+      mapSpecialField('field_c14_ternak', 'Korban Ternak');
+      mapSpecialField('field_c14_satwa_mati', 'Korban Satwa Mati');
+      mapSpecialField('field_c14_rugi', 'Taksiran Kerugian (Rp)');
+      mapSpecialField('field_c14_upaya', 'Upaya Penanggulangan');
+
+      mapSpecialField('field_c15_asal', 'Asal-usul');
+
+      mapSpecialField('field_c16_tanggal', 'Tanggal Kelahiran');
+      mapSpecialField('field_c16_jantan', 'Jumlah Jantan');
+      mapSpecialField('field_c16_betina', 'Jumlah Betina');
+      mapSpecialField('field_c16_unknown', 'Jumlah Belum Diketahui');
+      mapSpecialField('field_c16_nama_usul', 'Usulan Nama Satwa');
+
+      mapSpecialField('field_c17_tanggal', 'Tanggal Kematian');
+      mapSpecialField('field_c17_jantan', 'Jumlah Jantan');
+      mapSpecialField('field_c17_betina', 'Jumlah Betina');
+      mapSpecialField('field_c17_unknown', 'Jumlah Belum Diketahui');
+      mapSpecialField('field_c17_usia', 'Perkiraan Usia Satwa');
+      mapSpecialField('field_c17_penyebab', 'Penyebab Kematian');
+      mapSpecialField('field_c17_upaya', 'Upaya Penanganan');
+
+      // Scroll smoothly to form head
+      document.getElementById('conservationForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function exitEditMode() {
+      document.getElementById('editRowId').value = '';
+      document.getElementById('editModeBadge').classList.add('hidden');
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+      document.getElementById('resetBtn').classList.remove('hidden');
+      
+      document.getElementById('submitBtnText').innerText = "Kirim Laporan";
+      document.getElementById('submitBtnIcon').className = "fa-regular fa-paper-plane";
+      document.getElementById('submitBtn').className = "px-6 py-3 text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center space-x-2";
+      
+      document.getElementById('conservationForm').reset();
+      
+      // Ensure readonly field stays populated
+      if (document.getElementById('field_unit_kerja')) {
+        document.getElementById('field_unit_kerja').value = "Balai KSDA Kalimantan Timur";
+      }
+    }
+
+    function showAlert(type, message) {
+      const box = document.getElementById('alertBox');
+      box.className = "mb-6 p-4 rounded-2xl flex items-start space-x-3 transition-all";
+      box.classList.remove('hidden');
+      
+      let icon = '';
+      if (type === 'success') {
+        box.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200', 'dark:bg-emerald-950/40', 'dark:text-emerald-300', 'dark:border-emerald-800');
+        icon = '<i class="fa-solid fa-circle-check text-lg mt-0.5"></i>';
+      } else if (type === 'error') {
+        box.classList.add('bg-rose-50', 'text-rose-800', 'border', 'border-rose-200', 'dark:bg-rose-950/40', 'dark:text-rose-300', 'dark:border-rose-800');
+        icon = '<i class="fa-solid fa-circle-exclamation text-lg mt-0.5"></i>';
+      } else {
+        box.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200', 'dark:bg-blue-950/40', 'dark:text-blue-300', 'dark:border-blue-800');
+        icon = '<i class="fa-solid fa-circle-info text-lg mt-0.5"></i>';
+      }
+      
+      box.innerHTML = `
+        ${icon}
+        <div>
+          <p class="text-xs font-bold leading-relaxed">${message}</p>
+        </div>
+      `;
+      box.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function hideAlert() {
+      document.getElementById('alertBox').classList.add('hidden');
+    }
+
+    function handleFormSubmission(event) {
+      event.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.innerHTML;
+      const loader = document.getElementById('globalLoading');
+      
+      submitBtn.disabled = true;
+      loader.classList.remove('hidden');
+      
+      const moduleCode = document.getElementById('activeModule').value;
+      const form = document.getElementById('conservationForm');
+      const formData = new FormData(form);
+      
+      let fields = {};
+      formData.forEach((val, key) => {
+        fields[key] = val;
+      });
+
+      google.script.run
+        .withSuccessHandler((response) => {
+          submitBtn.disabled = false;
+          loader.classList.add('hidden');
+          
+          if (response.success) {
+            showAlert('success', response.message);
+            exitEditMode();
+            
+            const activePeriodType = document.getElementById('activePeriodType').value;
+            renderPeriodFields(activePeriodType);
+            renderDynamicFields(moduleCode);
+            loadHistoryData();
+          } else {
+            showAlert('error', "Gagal Menyimpan: " + response.message);
+          }
+        })
+        .withFailureHandler((err) => {
+          submitBtn.disabled = false;
+          loader.classList.add('hidden');
+          showAlert('error', "Gagal terhubung ke database: " + err.message);
+        })
+        .submitConservationData(moduleCode, fields);
+    }
+
+    function loadHistoryData() {
+      const moduleCode = document.getElementById('activeModule').value;
+      const tableHeaderRow = document.getElementById('historyTableHeaderRow');
+      const tableBody = document.getElementById('historyTableBody');
+      const columnsList = columnsMap[moduleCode] || [];
+      
+      // Clear Search input when changing module or refreshing
+      document.getElementById('dbSearch').value = '';
+
+      // 1. Render Table Headers dynamically according to module configurations
+      tableHeaderRow.innerHTML = '';
+      columnsList.forEach(col => {
+        const th = document.createElement('th');
+        th.className = "p-3 font-semibold text-gray-600 dark:text-gray-300 tracking-wider";
+        th.innerText = col;
+        tableHeaderRow.appendChild(th);
+      });
+      // Add the final action column header
+      const actionTh = document.createElement('th');
+      actionTh.className = "p-3 font-semibold text-gray-600 dark:text-gray-300 tracking-wider text-center w-28";
+      actionTh.innerText = "Aksi";
+      tableHeaderRow.appendChild(actionTh);
+
+      // Show Loading Body
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="${columnsList.length + 1}" class="p-12 text-center text-gray-400 dark:text-gray-500">
+            <i class="fa-solid fa-spinner animate-spin text-lg mb-2 block text-brand-600"></i>
+            Menyelaraskan data Rekapitulasi...
+          </td>
+        </tr>
+      `;
+      
+      // 2. Fetch recent database from Sheets
+      google.script.run
+        .withSuccessHandler((data) => {
+          loadedHistoryRecords = data || []; // Cache records in memory
+          renderTableRows(loadedHistoryRecords);
+        })
+        .withFailureHandler(() => {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="${columnsList.length + 1}" class="p-8 text-center text-rose-500 font-bold">
+                Gagal memuat log data terbaru.
+              </td>
+            </tr>
+          `;
+        })
+        .getRecentData(moduleCode);
+    }
+
+    // Render Rows into the body dynamically
+    function renderTableRows(records) {
+      const moduleCode = document.getElementById('activeModule').value;
+      const tableBody = document.getElementById('historyTableBody');
+      const columnsList = columnsMap[moduleCode] || [];
+
+      if (!records || records.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="${columnsList.length + 1}" class="p-16 text-center text-gray-400 dark:text-gray-500">
+              <div class="flex flex-col items-center justify-center space-y-3">
+                <i class="fa-regular fa-folder-open text-4xl opacity-50"></i>
+                <p class="text-sm">Belum ada entri data pada modul ini.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tableBody.innerHTML = '';
+      records.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "border-b border-gray-100 dark:border-gray-800/80 hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-all";
+        
+        // Loop dynamic values matches header keys
+        columnsList.forEach(col => {
+          const td = document.createElement('td');
+          td.className = "p-3 font-medium text-gray-700 dark:text-gray-300";
+          
+          let val = item[col] || '-';
+          
+          if (col === 'Satuan Kerja') {
+            td.className = "p-3 font-bold text-gray-900 dark:text-white";
+          }
+          
+          td.innerText = val;
+          tr.appendChild(td);
+        });
+
+        // Append custom action block column at the right end
+        const tdAction = document.createElement('td');
+        tdAction.className = "p-3 text-center";
+        tdAction.innerHTML = `
+          <div class="flex items-center justify-center space-x-1.5">
+            <button type="button" onclick="enterEditMode('${item.ID}')" class="p-2 bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 rounded-lg text-xs transition-all" title="Edit Data">
+              <i class="fa-solid fa-pencil"></i>
+            </button>
+            <button type="button" onclick="openDeleteModal('${moduleCode}', '${item.ID}')" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 rounded-lg text-xs transition-all" title="Hapus Data">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+        tr.appendChild(tdAction);
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Client-Side Live Search Engine
+    function applyClientSideSearch() {
+      const query = document.getElementById('dbSearch').value.toLowerCase().trim();
+      if (!query) {
+        renderTableRows(loadedHistoryRecords);
+        return;
+      }
+
+      const filtered = loadedHistoryRecords.filter(row => {
+        return Object.values(row).some(val => 
+          String(val).toLowerCase().includes(query)
+        );
+      });
+
+      renderTableRows(filtered);
+    }
+
+    // Modal delete workflows
+    function openDeleteModal(moduleCode, id) {
+      targetDeleteModule = moduleCode;
+      targetDeleteId = id;
+      
+      const modal = document.getElementById('deleteConfirmModal');
+      modal.classList.remove('hidden');
+      
+      document.getElementById('confirmDeleteBtn').onclick = () => executeRowDeletion();
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteConfirmModal').classList.add('hidden');
+      targetDeleteModule = null;
+      targetDeleteId = null;
+    }
+
+    function executeRowDeletion() {
+      if (!targetDeleteModule || !targetDeleteId) return;
+      
+      closeDeleteModal();
+      const loader = document.getElementById('globalLoading');
+      loader.classList.remove('hidden');
+      
+      google.script.run
+        .withSuccessHandler((res) => {
+          loader.classList.add('hidden');
+          if (res.success) {
+            showAlert('success', res.message);
+            loadHistoryData();
+          } else {
+            showAlert('error', res.message);
+          }
+        })
+        .withFailureHandler((err) => {
+          loader.classList.add('hidden');
+          showAlert('error', "Gagal menghapus data: " + err.message);
+        })
+        .deleteConservationData(targetDeleteModule, targetDeleteId);
+    }
+
+    window.onload = function() {
+      // Setup Initial filters state
+      filterPeriod('Bulanan');
+      selectModule('C.01');
+    }
+  </script>
+</body>
+</html>
