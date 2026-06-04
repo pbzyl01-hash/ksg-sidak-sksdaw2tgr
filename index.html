@@ -305,97 +305,30 @@
   </div>
 
   <script>
-    // Global fallback for local offline visual test
-    if (typeof google === 'undefined' || !google.script || !google.script.run) {
-      console.info("Google Apps Script API Offline. Menyiapkan simulator lokal.");
-      
-      window.localDB = {
-        'C.01': [
-          { 'ID': 'C.01-101', 'Satuan Kerja': 'Balai KSDA Kalimantan Timur', 'Bulan/Periode': 'Januari', 'Tahun': '2026', 'Nama Ilmiah Spesies': 'Pongo pygmaeus', 'Jml Indv yang dijumpai': '3', 'Longitude (X)': '116,5892', 'Latitude (Y)': '-0,4322', 'Tanggal Perjumpaan': '2026-01-15', 'Kategori Perjumpaan': 'Perjumpaan langsung', 'Keterangan': 'Induk dengan satu anak' }
-        ],
-        'C.02': [
-          { 'ID': 'C.02-202', 'Satuan Kerja': 'Balai KSDA Kalimantan Timur', 'Periode': 'Tahunan', 'Tahun': '2026', 'Nama Lembaga Konservasi': 'Taman Safari Prigen', 'Bentuk Lembaga Konservasi': 'Taman Safari', 'Alamat': 'Prigen, Pasuruan', 'Longitude (X)': '112,6541', 'Latitude (Y)': '-7,7421', 'Luas Areal (Ha)': '350', 'Nomor Perizinan': 'SK.12/MENHUT/2021', 'Tanggal Perizinan': '2021-04-10', 'Tanggal Berakhir Izin': '2031-04-10', 'Keterangan': 'Izin Aktif' }
-        ]
-      };
+    // ============================================================
+    // KONFIGURASI URL GOOGLE APPS SCRIPT
+    // Isi GAS_URL dengan URL Web App setelah deploy di Apps Script
+    // ============================================================
+    const GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzHJJo5VCAced9ytQUIaKiY4LrfkGBNJ4jigs8k3pQ3Eej9FtTmogXg1ikghe1ZaXdq/exec";
 
-      window.google = {
-        script: {
-          run: {
-            withSuccessHandler: function(successCallback) {
-              return {
-                withFailureHandler: function(failureCallback) {
-                  return {
-                    getRecentData: function(moduleCode) {
-                      setTimeout(() => {
-                        successCallback(window.localDB[moduleCode] || []);
-                      }, 400);
-                    },
-                    submitConservationData: function(moduleCode, fields) {
-                      setTimeout(() => {
-                        if (!window.localDB[moduleCode]) {
-                          window.localDB[moduleCode] = [];
-                        }
-                        
-                        if (fields.row_id) {
-                          let idx = window.localDB[moduleCode].findIndex(r => r.ID === fields.row_id);
-                          if (idx !== -1) {
-                            let updatedRow = Object.assign({}, fields);
-                            updatedRow.ID = fields.row_id;
-                            updatedRow['Satuan Kerja'] = 'Balai KSDA Kalimantan Timur';
-                            updatedRow['Tahun'] = fields.tahun;
-                            updatedRow['Bulan/Periode'] = fields.bulan_val || fields.triwulan_val || fields.semester_val || 'Tahunan';
-                            updatedRow['Periode'] = updatedRow['Bulan/Periode'];
-                            updatedRow['Nama Ilmiah Spesies'] = fields.spesies_val;
-                            updatedRow['Jml Indv yang dijumpai'] = fields.jumlah_val;
-                            updatedRow['Nama Lembaga Konservasi'] = fields.c02_lembaga;
-                            updatedRow['Bentuk Lembaga Konservasi'] = fields.c02_bentuk;
-                            updatedRow['Alamat'] = fields.c02_alamat;
-                            updatedRow['Longitude (X)'] = fields.c01_lng || fields.c02_lng;
-                            updatedRow['Latitude (Y)'] = fields.c01_lat || fields.c02_lat;
-                            updatedRow['Keterangan'] = fields.keterangan_val;
-                            window.localDB[moduleCode][idx] = updatedRow;
-                          }
-                        } else {
-                          let newId = moduleCode + "-" + Date.now();
-                          let newRow = {
-                            'ID': newId,
-                            'Satuan Kerja': 'Balai KSDA Kalimantan Timur',
-                            'Tahun': fields.tahun,
-                            'Bulan/Periode': fields.bulan_val || fields.triwulan_val || fields.semester_val || 'Tahunan',
-                            'Periode': fields.bulan_val || fields.triwulan_val || fields.semester_val || 'Tahunan',
-                            'Nama Ilmiah Spesies': fields.spesies_val,
-                            'Jml Indv yang dijumpai': fields.jumlah_val,
-                            'Nama Lembaga Konservasi': fields.c02_lembaga,
-                            'Bentuk Lembaga Konservasi': fields.c02_bentuk,
-                            'Alamat': fields.c02_alamat,
-                            'Longitude (X)': fields.c01_lng || fields.c02_lng || fields.c04_lng || fields.c06_lng || fields.c14_lng || fields.c15_lng || fields.c16_lng || fields.c17_lng,
-                            'Latitude (Y)': fields.c01_lat || fields.c02_lat || fields.c04_lat || fields.c06_lat || fields.c14_lat || fields.c15_lat || fields.c16_lat || fields.c17_lat,
-                            'Keterangan': fields.keterangan_val
-                          };
-                          window.localDB[moduleCode].push(newRow);
-                        }
-                        successCallback({ success: true, message: "Aksi Simulasi Sukses!" });
-                      }, 600);
-                    },
-                    deleteConservationData: function(moduleCode, id) {
-                      setTimeout(() => {
-                        if (window.localDB[moduleCode]) {
-                          window.localDB[moduleCode] = window.localDB[moduleCode].filter(r => r.ID !== id);
-                        }
-                        successCallback({ success: true, message: "Simulasi Hapus Sukses!" });
-                      }, 400);
-                    },
-                    setupDatabase: function() {
-                      setTimeout(() => successCallback({ success: true }), 100);
-                    }
-                  };
-                }
-              };
-            }
-          }
-        }
-      };
+    // Fungsi helper untuk memanggil GAS via GET (getData)
+    async function gasGet(params) {
+      const url = new URL(GAS_URL);
+      Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
+      const res = await fetch(url.toString());
+      return res.json();
     }
+
+    // Fungsi helper untuk memanggil GAS via POST (submit/delete)
+    async function gasPost(body) {
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return res.json();
+    }
+
 
     // Mapping Modules Specifications
     const modulesMap = {
@@ -1460,15 +1393,13 @@
         fields[key] = val;
       });
 
-      google.script.run
-        .withSuccessHandler((response) => {
+      gasPost({ action: 'submit', moduleCode: moduleCode, fields: fields })
+        .then((response) => {
           submitBtn.disabled = false;
           loader.classList.add('hidden');
-          
           if (response.success) {
             showAlert('success', response.message);
             exitEditMode();
-            
             const activePeriodType = document.getElementById('activePeriodType').value;
             renderPeriodFields(activePeriodType);
             renderDynamicFields(moduleCode);
@@ -1477,12 +1408,11 @@
             showAlert('error', "Gagal Menyimpan: " + response.message);
           }
         })
-        .withFailureHandler((err) => {
+        .catch((err) => {
           submitBtn.disabled = false;
           loader.classList.add('hidden');
           showAlert('error', "Gagal terhubung ke database: " + err.message);
-        })
-        .submitConservationData(moduleCode, fields);
+        });
     }
 
     function loadHistoryData() {
@@ -1518,22 +1448,21 @@
         </tr>
       `;
       
-      // 2. Fetch recent database from Sheets
-      google.script.run
-        .withSuccessHandler((data) => {
-          loadedHistoryRecords = data || []; // Cache records in memory
+      // 2. Fetch recent database from Sheets via GAS API
+      gasGet({ action: 'getData', module: moduleCode })
+        .then((result) => {
+          loadedHistoryRecords = (result.data) || [];
           renderTableRows(loadedHistoryRecords);
         })
-        .withFailureHandler(() => {
+        .catch(() => {
           tableBody.innerHTML = `
             <tr>
               <td colspan="${columnsList.length + 1}" class="p-8 text-center text-rose-500 font-bold">
-                Gagal memuat log data terbaru.
+                Gagal memuat log data terbaru. Cek GAS_URL di konfigurasi.
               </td>
             </tr>
           `;
-        })
-        .getRecentData(moduleCode);
+        });
     }
 
     // Render Rows into the body dynamically
@@ -1635,8 +1564,8 @@
       const loader = document.getElementById('globalLoading');
       loader.classList.remove('hidden');
       
-      google.script.run
-        .withSuccessHandler((res) => {
+      gasPost({ action: 'delete', moduleCode: targetDeleteModule, id: targetDeleteId })
+        .then((res) => {
           loader.classList.add('hidden');
           if (res.success) {
             showAlert('success', res.message);
@@ -1645,11 +1574,10 @@
             showAlert('error', res.message);
           }
         })
-        .withFailureHandler((err) => {
+        .catch((err) => {
           loader.classList.add('hidden');
           showAlert('error', "Gagal menghapus data: " + err.message);
-        })
-        .deleteConservationData(targetDeleteModule, targetDeleteId);
+        });
     }
 
     window.onload = function() {
