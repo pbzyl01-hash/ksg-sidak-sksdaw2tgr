@@ -309,24 +309,37 @@
     // KONFIGURASI URL GOOGLE APPS SCRIPT
     // Isi GAS_URL dengan URL Web App setelah deploy di Apps Script
     // ============================================================
-    const GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzHJJo5VCAced9ytQUIaKiY4LrfkGBNJ4jigs8k3pQ3Eej9FtTmogXg1ikghe1ZaXdq/exec";
+    const GAS_URL = window.GAS_URL || "GANTI_DENGAN_URL_WEB_APP_ANDA";
 
-    // Fungsi helper untuk memanggil GAS via GET (getData)
+    // Fungsi helper GET — pakai no-cors workaround via URL param
+    // GAS tidak support CORS preflight, semua request pakai GET + action param
     async function gasGet(params) {
       const url = new URL(GAS_URL);
       Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
-      const res = await fetch(url.toString());
-      return res.json();
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        redirect: 'follow'
+      });
+      const text = await res.text();
+      try { return JSON.parse(text); }
+      catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
     }
 
-    // Fungsi helper untuk memanggil GAS via POST (submit/delete)
+    // Fungsi helper POST — encode sebagai form-urlencoded agar GAS bisa baca
+    // GAS Web App tidak support JSON body di doPost dengan CORS, pakai form encoding
     async function gasPost(body) {
-      const res = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+      // Encode semua sebagai query param di URL (GET request) agar bypass CORS preflight
+      // GAS hanya support simple request (no preflight)
+      const url = new URL(GAS_URL);
+      url.searchParams.append('action', body.action);
+      url.searchParams.append('payload', JSON.stringify(body));
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        redirect: 'follow'
       });
-      return res.json();
+      const text = await res.text();
+      try { return JSON.parse(text); }
+      catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
     }
 
 
