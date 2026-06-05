@@ -129,7 +129,7 @@
           <p class="text-xs text-emerald-700/90 dark:text-emerald-300/80 leading-relaxed">
             Folder periode pada Google Drive disusun otomatis berdasarkan kelompok waktu pelaporan (Misal: Januari, Triwulan I, Semester I, Tahunan).
           </p>
-          <a href="https://drive.google.com/drive/folders/1PgPHxhgvz9n_Rr0JmaTnVq1ZhQayz-uV?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline mt-3">
+          <a href="https://drive.google.com/drive/folders/12J0W6rTxhNdVJ2eD_eUSaacCBcue495u?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline mt-3">
             <span>Akses Link Drive SIDAK</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
           </a>
@@ -309,7 +309,7 @@
     // KONFIGURASI URL GOOGLE APPS SCRIPT
     // Isi GAS_URL dengan URL Web App setelah deploy di Apps Script
     // ============================================================
-    const GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzHJJo5VCAced9ytQUIaKiY4LrfkGBNJ4jigs8k3pQ3Eej9FtTmogXg1ikghe1ZaXdq/exec";
+    const GAS_URL = window.GAS_URL || "GANTI_DENGAN_URL_WEB_APP_ANDA";
 
     // Fungsi helper GET — pakai no-cors workaround via URL param
     // GAS tidak support CORS preflight, semua request pakai GET + action param
@@ -325,18 +325,15 @@
       catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
     }
 
-    // Fungsi helper POST — encode sebagai form-urlencoded agar GAS bisa baca
-    // GAS Web App tidak support JSON body di doPost dengan CORS, pakai form encoding
+    // Fungsi helper POST — kirim via GET dengan param terpisah (bypass CORS)
     async function gasPost(body) {
-      // Encode semua sebagai query param di URL (GET request) agar bypass CORS preflight
-      // GAS hanya support simple request (no preflight)
       const url = new URL(GAS_URL);
       url.searchParams.append('action', body.action);
-      url.searchParams.append('payload', JSON.stringify(body));
-      const res = await fetch(url.toString(), {
-        method: 'GET',
-        redirect: 'follow'
-      });
+      // Kirim setiap field top-level sebagai param terpisah agar tidak ada masalah encoding JSON
+      if (body.moduleCode) url.searchParams.append('moduleCode', body.moduleCode);
+      if (body.id)         url.searchParams.append('id', body.id);
+      if (body.fields)     url.searchParams.append('fields', JSON.stringify(body.fields));
+      const res = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
       const text = await res.text();
       try { return JSON.parse(text); }
       catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
