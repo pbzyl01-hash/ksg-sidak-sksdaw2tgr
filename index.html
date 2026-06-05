@@ -129,7 +129,7 @@
           <p class="text-xs text-emerald-700/90 dark:text-emerald-300/80 leading-relaxed">
             Folder periode pada Google Drive disusun otomatis berdasarkan kelompok waktu pelaporan (Misal: Januari, Triwulan I, Semester I, Tahunan).
           </p>
-          <a href="https://drive.google.com/drive/folders/1PgPHxhgvz9n_Rr0JmaTnVq1ZhQayz-uV?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline mt-3">
+          <a href="https://drive.google.com/drive/folders/12J0W6rTxhNdVJ2eD_eUSaacCBcue495u?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline mt-3">
             <span>Akses Link Drive SIDAK</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
           </a>
@@ -1523,7 +1523,11 @@
             <button type="button" onclick="enterEditMode('${item.ID}')" class="p-2 bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 rounded-lg text-xs transition-all" title="Edit Data">
               <i class="fa-solid fa-pencil"></i>
             </button>
-            <button type="button" onclick="openDeleteModal('${moduleCode}', '${item.ID}')" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 rounded-lg text-xs transition-all" title="Hapus Data">
+            <button type="button" 
+              data-module="${moduleCode}" 
+              data-id="${item.ID}"
+              onclick="openDeleteModal(this.dataset.module, this.dataset.id)" 
+              class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 rounded-lg text-xs transition-all" title="Hapus Data">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -1552,6 +1556,11 @@
 
     // Modal delete workflows
     function openDeleteModal(moduleCode, id) {
+      // Fallback: jika moduleCode undefined/kosong, ambil dari prefix ID (misal "C.01-178..." → "C.01")
+      if (!moduleCode || moduleCode === 'undefined') {
+        const match = String(id).match(/^(C\.\d+)-/);
+        moduleCode = match ? match[1] : document.getElementById('activeModule').value;
+      }
       targetDeleteModule = moduleCode;
       targetDeleteId = id;
       
