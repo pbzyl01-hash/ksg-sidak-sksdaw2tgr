@@ -86,6 +86,17 @@
       </div>
       
       <div class="flex items-center space-x-3">
+        <!-- Clock & Date -->
+        <div class="hidden sm:flex flex-col items-end leading-tight mr-1">
+          <span id="liveClock" class="text-base font-extrabold text-brand-600 dark:text-brand-400 tabular-nums tracking-tight"></span>
+          <span id="liveDate" class="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider"></span>
+        </div>
+        <!-- Tombol Spreadsheet Database -->
+        <a href="https://docs.google.com/spreadsheets/d/1ZBsoc_7bTdnRcvjjX3cCqjKerIaDkI7M0NklvIfvWNE/edit?usp=sharing" target="_blank"
+          class="hidden sm:inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-500/20 transition-all">
+          <i class="fa-brands fa-google-drive text-sm"></i>
+          <span>Database Spreadsheet</span>
+        </a>
         <button id="themeToggle" class="p-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all flex items-center justify-center text-lg shadow-sm" title="Ubah Mode Visual">
           <i id="themeIcon" class="fa-solid fa-moon text-gray-600 dark:text-yellow-400"></i>
         </button>
@@ -121,16 +132,7 @@
           </div>
         </div>
         
-        <div class="bg-emerald-50 dark:bg-emerald-950/40 rounded-3xl p-6 border border-emerald-200/50 dark:border-emerald-900/30">
-          <h4 class="text-sm font-bold text-emerald-800 dark:text-emerald-400 mb-2 flex items-center space-x-1.5">
-            <i class="fa-brands fa-google-drive"></i>
-            <span>Arsip Google Drive</span>
-          </h4>
-          <a href="https://docs.google.com/spreadsheets/d/1ZBsoc_7bTdnRcvjjX3cCqjKerIaDkI7M0NklvIfvWNE/edit?usp=sharing" target="_blank" class="inline-flex items-center space-x-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline mt-3">
-            <span>Akses Link Drive SIDAK</span>
-            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-          </a>
-        </div>
+
       </div>
 
       <!-- Right Column: Input Form and Database Table Viewer -->
@@ -245,6 +247,10 @@
                 </span>
                 <input type="text" id="dbSearch" oninput="applyClientSideSearch()" placeholder="Cari data..." class="w-full h-10 pl-9 pr-4 text-xs rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
               </div>
+              <button onclick="downloadExcel()" class="h-10 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 rounded-xl flex items-center space-x-1.5 transition text-xs font-bold" title="Unduh Rekap Excel">
+                <i class="fa-solid fa-file-excel"></i>
+                <span class="hidden sm:inline">Excel</span>
+              </button>
               <button onclick="loadHistoryData()" class="w-10 h-10 bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-800 rounded-xl flex items-center justify-center transition" title="Segarkan Data">
                 <i class="fa-solid fa-arrows-rotate text-xs"></i>
               </button>
@@ -313,24 +319,19 @@
     async function gasGet(params) {
       const url = new URL(GAS_URL);
       Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
-      const res = await fetch(url.toString(), {
-        method: 'GET',
-        redirect: 'follow'
-      });
+      const res = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
       const text = await res.text();
       try { return JSON.parse(text); }
       catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
     }
 
-    // Fungsi helper POST — kirim via GET dengan param terpisah (bypass CORS)
     async function gasPost(body) {
-      const url = new URL(GAS_URL);
-      url.searchParams.append('action', body.action);
-      // Kirim setiap field top-level sebagai param terpisah agar tidak ada masalah encoding JSON
-      if (body.moduleCode) url.searchParams.append('moduleCode', body.moduleCode);
-      if (body.id)         url.searchParams.append('id', body.id);
-      if (body.fields)     url.searchParams.append('fields', JSON.stringify(body.fields));
-      const res = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(body),
+        redirect: 'follow'
+      });
       const text = await res.text();
       try { return JSON.parse(text); }
       catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
@@ -1608,6 +1609,65 @@
           loader.classList.add('hidden');
           showAlert('error', "Gagal menghapus data: " + err.message);
         });
+    }
+
+    // ── Live Clock ────────────────────────────────────────────────
+    const HARI = ['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
+    const BULAN = ['JAN','FEB','MAR','APR','MEI','JUN','JUL','AGU','SEP','OKT','NOV','DES'];
+    function updateClock() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+      const hari = HARI[now.getDay()];
+      const tgl  = String(now.getDate()).padStart(2,'0');
+      const bln  = BULAN[now.getMonth()];
+      const thn  = now.getFullYear();
+      const clockEl = document.getElementById('liveClock');
+      const dateEl  = document.getElementById('liveDate');
+      if (clockEl) clockEl.textContent = hh + ':' + mm + ':' + ss;
+      if (dateEl)  dateEl.textContent  = hari + ', ' + tgl + ' ' + bln + ' ' + thn;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ── Download Excel ─────────────────────────────────────────────
+    function downloadExcel() {
+      const moduleCode = document.getElementById('activeModule').value;
+      if (!loadedHistoryRecords || loadedHistoryRecords.length === 0) {
+        showAlert('error', 'Tidak ada data untuk diunduh. Muat data terlebih dahulu.');
+        return;
+      }
+      const headers = Object.keys(loadedHistoryRecords[0]);
+      const rows = loadedHistoryRecords.map(r => headers.map(h => {
+        const v = r[h];
+        return (v === null || v === undefined) ? '' : v;
+      }));
+
+      // Build CSV with BOM for Excel UTF-8 compatibility
+      let csv = '﻿' + headers.join(',') + '
+';
+      rows.forEach(row => {
+        csv += row.map(cell => {
+          const s = String(cell).replace(/"/g, '""');
+          return /[,"
+]/.test(s) ? '"' + s + '"' : s;
+        }).join(',') + '
+';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const now  = new Date();
+      const stamp = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+      link.href = url;
+      link.download = 'Rekap_' + moduleCode + '_' + stamp + '.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showAlert('success', 'Rekap Modul ' + moduleCode + ' berhasil diunduh sebagai CSV/Excel.');
     }
 
     window.onload = function() {
