@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIDAK KSDAE - Web Konservasi Spesies dan Genetik</title>
+  <title>KSG - SIDAK - Seksi KSDA Wilayah II Tenggarong<t/itle>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -309,15 +309,21 @@
     // KONFIGURASI URL GOOGLE APPS SCRIPT
     // Isi GAS_URL dengan URL Web App setelah deploy di Apps Script
     // ============================================================
-    const GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzHJJo5VCAced9ytQUIaKiY4LrfkGBNJ4jigs8k3pQ3Eej9FtTmogXg1ikghe1ZaXdq/exec";
+    const GAS_URL = window.GAS_URL || "https://script.google.com/macros/s/AKfycbzYr-LKntPHYccZi_D89ohJ7Ct66D_qBG4qTUypKwV01ZmbWK206bY0ETt2VonQfyUMWA/exec";
 
-    // Fungsi helper GET — pakai no-cors workaround via URL param
-    // GAS tidak support CORS preflight, semua request pakai GET + action param
-    async function gasGet(params) {
-      const url = new URL(GAS_URL);
-      Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
-      const res = await fetch(url.toString(), {
-        method: 'GET',
+    // ── GAS API Helpers ──────────────────────────────────────────
+    // PENTING: GAS Web App melakukan redirect 302, dan query params
+    // HILANG saat redirect. Solusi: kirim semua data via POST body
+    // dengan content-type text/plain (simple request = no preflight CORS)
+    // GAS membaca body di doPost via e.postData.contents
+
+    async function gasCall(payload) {
+      // Kirim sebagai POST text/plain — bypass CORS preflight sekaligus
+      // tidak kehilangan data saat GAS redirect
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload),
         redirect: 'follow'
       });
       const text = await res.text();
@@ -325,18 +331,19 @@
       catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
     }
 
-    // Fungsi helper POST — kirim via GET dengan param terpisah (bypass CORS)
-    async function gasPost(body) {
+    // gasGet tetap pakai GET untuk getData (read-only, tidak ada data dikirim)
+    async function gasGet(params) {
       const url = new URL(GAS_URL);
-      url.searchParams.append('action', body.action);
-      // Kirim setiap field top-level sebagai param terpisah agar tidak ada masalah encoding JSON
-      if (body.moduleCode) url.searchParams.append('moduleCode', body.moduleCode);
-      if (body.id)         url.searchParams.append('id', body.id);
-      if (body.fields)     url.searchParams.append('fields', JSON.stringify(body.fields));
+      Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
       const res = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
       const text = await res.text();
       try { return JSON.parse(text); }
       catch(e) { throw new Error('Response bukan JSON: ' + text.substring(0, 100)); }
+    }
+
+    // gasPost sekarang pakai gasCall (POST text/plain)
+    async function gasPost(body) {
+      return gasCall(body);
     }
 
 
