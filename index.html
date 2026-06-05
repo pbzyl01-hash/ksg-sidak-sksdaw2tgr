@@ -1518,20 +1518,30 @@
         // Append custom action block column at the right end
         const tdAction = document.createElement('td');
         tdAction.className = "p-3 text-center";
-        tdAction.innerHTML = `
-          <div class="flex items-center justify-center space-x-1.5">
-            <button type="button" onclick="enterEditMode('${item.ID}')" class="p-2 bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 rounded-lg text-xs transition-all" title="Edit Data">
-              <i class="fa-solid fa-pencil"></i>
-            </button>
-            <button type="button" 
-              data-module="${moduleCode}" 
-              data-id="${item.ID}"
-              onclick="openDeleteModal(this.dataset.module, this.dataset.id)" 
-              class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 rounded-lg text-xs transition-all" title="Hapus Data">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </div>
-        `;
+        // Buat tombol secara programatik agar tidak ada masalah escaping/template
+        const divAct = document.createElement('div');
+        divAct.className = 'flex items-center justify-center space-x-1.5';
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'p-2 bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 rounded-lg text-xs transition-all';
+        editBtn.title = 'Edit Data';
+        editBtn.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+        editBtn.addEventListener('click', () => enterEditMode(item.ID));
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 rounded-lg text-xs transition-all';
+        delBtn.title = 'Hapus Data';
+        delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+        // Simpan nilai langsung di closure, 100% aman dari masalah escaping/undefined
+        const capturedModule = moduleCode;
+        const capturedId = item.ID;
+        delBtn.addEventListener('click', () => openDeleteModal(capturedModule, capturedId));
+
+        divAct.appendChild(editBtn);
+        divAct.appendChild(delBtn);
+        tdAction.appendChild(divAct);
         tr.appendChild(tdAction);
         tableBody.appendChild(tr);
       });
