@@ -407,7 +407,7 @@
 
     // Columns Mapping (Matches Code.gs headers configuration)
     const columnsMap = {
-      'C.01': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Tanggal Perjumpaan', 'Kategori Perjumpaan', 'Nama Ilmiah Spesies', 'Jml Indv yang dijumpai', 'Longitude (X)', 'Latitude (Y)', 'Keterangan'],
+      'C.01': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan', 'Tanggal Perjumpaan', 'Kategori Perjumpaan', 'Nama Ilmiah Spesies', 'Jml Indv yang dijumpai', 'Longitude (X)', 'Latitude (Y)', 'Keterangan'],
       'C.02': ['ID', 'Satuan Kerja', 'Tahun', 'Periode', 'Nama Lembaga Konservasi', 'Betuk Lembaga Konservasi', 'Alamat', 'Longitude (X)', 'Latitude (Y)', 'Luas Areal (Ha)', 'Nomor Perizinan', 'Tanggal Perizinan', 'Tanggal Berakhir Izin', 'Keterangan'],
       'C.03': ['ID', 'Satuan Kerja', 'Tahun', 'Semester/Periode', 'Nama Lembaga Konservasi', 'Bentuk Lembaga Konservasi', 'Nama Ilmiah Spesies', 'Jantan', 'Betina', 'Belum Diketahui', 'Keterangan'],
       'C.04': ['ID', 'Satuan Kerja', 'Tahun', 'Nama Penangkar', 'Alamat', 'Lokasi Unit Penangkaran', 'Longitude (X)', 'Latitude (Y)', 'Nomor Perizinan', 'Tanggal Perizinan', 'Tanggal Berakhir Izin', 'Luas Areal (Ha)', 'Keterangan'],
@@ -416,12 +416,12 @@
       'C.08': ['ID', 'Satuan Kerja', 'Tahun', 'Triwulan/Periode', 'Nama Spesies', 'Jenis', 'Provinsi', 'Volume Realisasi Tangkap', 'Satuan Realisasi Tangkap', 'Keterangan'],
       'C.09': ['ID', 'Satuan Kerja', 'Tahun', 'Triwulan/Periode', 'Nama Penangkar', 'Nama Spesies', 'Jenis', 'Negara', 'Volume Kuota Ekspor', 'Satuan Kuota Ekspor', 'Volume Realisasi Ekspor', 'Satuan Realisasi Ekspor', 'Keterangan'],
       'C.10': ['ID', 'Satuan Kerja', 'Tahun', 'Triwulan/Periode', 'Nama Pengedar TSL', 'Nama Spesies', 'Jenis', 'Negara', 'Volume Kuota Ekspor', 'Satuan Kuota Ekspor', 'Volume Realisasi Ekspor', 'Satuan Realisasi Ekspor', 'Keterangan'],
-      'C.11': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Spesies', 'Asal-usul', 'Jml Jenis Kelamin Jantan', 'Jml Jenis Kelamin Betina', 'Jml Jenis Kelamin Belum Diketahui', 'Keterangan'],
-      'C.12': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Akun PNBP', 'Realisasi Bulan ini', 'Keterangan'],
-      'C.14': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Spesies', 'Tanggal Kejadian', 'Jml Indv', 'Longitude (X)', 'Latitude (Y)', 'Korban Manusia Meninggal', 'Korban Manusia Cedera', 'Kerusakan Kebun/Lahan Masy (m2)', 'Kerusakan Bangunan', 'Korban Kambing', 'Korban Sapi', 'Korban Kerbau', 'Korban Anjing', 'Korban Babi', 'Korban Unggas', 'Korban Satwa Mati', 'Taksiran Kerugian (Rp)', 'Upaya Penanggulangan', 'Keterangan'],
-      'C.15': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Spesies', 'Jml Indv', 'Asal-usul', 'Longitude (X)', 'Latitude (Y)', 'Keterangan'],
-      'C.16': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Satwa', 'Tanggal Kelahiran', 'Jumlah Jantan', 'Jumlah Betina', 'Jumlah Belum Diketahui', 'Longitude (X)', 'Latitude (Y)', 'Usulan Nama Satwa', 'Keterangan'],
-      'C.17': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan/Periode', 'Nama Ilmiah Satwa', 'Tanggal Kematian', 'Jumlah Jantan', 'Jumlah Betina', 'Jumlah Belum Diketahui', 'Perkiraan Usia Satwa', 'Penyebab Kematian', 'Longitude (X)', 'Latitude (Y)', 'Upaya Penanganan', 'Keterangan']
+      'C.11': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan', 'Nama Ilmiah Spesies', 'Asal-usul', 'Jml Jenis Kelamin Jantan', 'Jml Jenis Kelamin Betina', 'Jml Jenis Kelamin Belum Diketahui', 'Keterangan'],
+      'C.12': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan', 'Akun PNBP', 'Realisasi Bulan ini', 'Keterangan'],
+      'C.14': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan', 'Nama Ilmiah Spesies', 'Tanggal Kejadian', 'Jml Indv', 'Longitude (X)', 'Latitude (Y)', 'Korban Manusia Meninggal', 'Korban Manusia Cedera', 'Kerusakan Kebun/Lahan Masy (m2)', 'Kerusakan Bangunan', 'Korban Kambing', 'Korban Sapi', 'Korban Kerbau', 'Korban Anjing', 'Korban Babi', 'Korban Unggas', 'Korban Satwa Mati', 'Taksiran Kerugian (Rp)', 'Upaya Penanggulangan', 'Keterangan'],
+      'C.15': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan', 'Nama Ilmiah Spesies', 'Jml Indv', 'Asal-usul', 'Longitude (X)', 'Latitude (Y)', 'Keterangan'],
+      'C.16': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan', 'Nama Ilmiah Satwa', 'Tanggal Kelahiran', 'Jumlah Jantan', 'Jumlah Betina', 'Jumlah Belum Diketahui', 'Longitude (X)', 'Latitude (Y)', 'Usulan Nama Satwa', 'Keterangan'],
+      'C.17': ['ID', 'Satuan Kerja', 'Tahun', 'Bulan', 'Nama Ilmiah Satwa', 'Tanggal Kematian', 'Jumlah Jantan', 'Jumlah Betina', 'Jumlah Belum Diketahui', 'Perkiraan Usia Satwa', 'Penyebab Kematian', 'Longitude (X)', 'Latitude (Y)', 'Upaya Penanganan', 'Keterangan']
     };
 
     let loadedHistoryRecords = []; // Cache lokal data
@@ -1246,7 +1246,7 @@
       
       // Populate period selectors
       const pType = document.getElementById('activePeriodType').value;
-      const periodVal = record['Bulan/Periode'] || record['Triwulan/Periode'] || record['Semester/Periode'] || record['Periode'] || '';
+      const periodVal = record['Bulan'] || record['Triwulan/Periode'] || record['Semester/Periode'] || record['Periode'] || '';
       
       if (pType === 'Bulanan' && document.getElementById('field_bulan_val')) {
         document.getElementById('field_bulan_val').value = periodVal;
